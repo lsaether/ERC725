@@ -24,4 +24,21 @@ contract("Identity", () => {
     const mgmtKey = await identity.keyHasPurpose(key, 1);
     assert(mgmtKey);
   })
+
+  it("Adds a new key", async () => {
+    const keyToAdd = web3.sha3(web3.eth.accounts[3], {encoding: "hex"});
+    const success = await identity.addKey(keyToAdd, 2, 1, {from: web3.eth.accounts[0]});
+    assert(success);
+
+    const keyDetails = await identity.getKey(keyToAdd);
+    expect(keyDetails[0].toNumber()).to.equal(2);
+    expect(keyDetails[1].toNumber()).to.equal(1);
+    expect(keyDetails[2]).to.equal(keyToAdd);
+
+    const mgmtKey = await identity.keyHasPurpose(keyToAdd, 1);
+    assert.isFalse(mgmtKey);
+    
+    const actionKey = await identity.keyHasPurpose(keyToAdd, 2);
+    assert(actionKey);
+  })
 })
