@@ -91,6 +91,32 @@ contract Identity is ERC725 {
     function execute(address _to, uint256 _value, bytes _data)
         public returns (uint256 executionId)
     {
-        
+        bytes32 key = keccak256(msg.sender);
+        require(keyHasPurpose(key, 1) || keyHasPurpose(key, 2), "Sender must be management or action key.");
+
+        emit ExecutionRequest(nonce, _to, _value, _data);
+
+        bool isApproved = approve(nonce, true);
+
+        if (isApproved) {
+            bool wasSuccessful = _to.call.value(_value)(_data);
+            if (wasSuccessful) {
+                emit Executed(nonce, _to, _value, _data);
+            }
+        }
+
+        nonce++;
+        return nonce-1;
+    }
+
+    function approve(uint256 _id, bool _approved)
+        public returns (bool success)
+    {
+        bytes32 key = keccak256(msg.sender);
+        require(keyHasPurpose(key, 1) || keyHasPurpose(key, 2), "Sender must be management or action key.");
+
+        emit Approved(_id, _approved);
+
+        return true;
     }
 }
