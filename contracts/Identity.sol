@@ -42,7 +42,7 @@ contract Identity is ERC725 {
     {
         require(keys[_key].key == 0x0, "Cannot overwrite key.");
         if (msg.sender != address(this)) {
-            require(keyHasPurpose(keccak256(msg.sender), 1), "Sender must be a manangement key.");
+            require(keyHasPurpose(keccak256(msg.sender), 1), "Sender must be manangement key.");
         }
 
         // TODO approval process
@@ -56,6 +56,34 @@ contract Identity is ERC725 {
         keysByPurpose[_purpose].push(_key);
 
         emit KeyAdded(_key, _purpose, _keyType);
+
+        success = true;
+    }
+
+    function removeKey(bytes32 _key, uint256 _purpose)
+        public returns (bool success)
+    {
+        require(keys[_key].key != 0x0, "Key does not exist!");
+        if (msg.sender != address(this)) {
+            require(keyHasPurpose(keccak256(msg.sender), 1), "Sender must be management key.");
+        }
+
+        // TODO approval process
+
+        require(keys[_key].purpose == _purpose, "Purpose does not exist for key!");
+
+        // Put some state in memory
+        uint256 keyType = keys[_key].keyType;
+
+        delete keys[_key];
+
+        for (uint256 i = 0; i < keysByPurpose[_purpose].length; i++) {
+            if (keysByPurpose[_purpose][i] == _key) {
+                delete keysByPurpose[_purpose];
+            }
+        }
+
+        emit KeyRemoved(_key, _purpose, keyType);
 
         success = true;
     }
