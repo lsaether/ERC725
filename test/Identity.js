@@ -25,7 +25,7 @@ contract("Identity", () => {
     assert(mgmtKey);
   })
 
-  it("Adds a new key", async () => {
+  it("Adds a new key when sent from management key", async () => {
     const keyToAdd = web3.sha3(web3.eth.accounts[3], {encoding: "hex"});
     const success = await identity.addKey(keyToAdd, 2, 1, {from: web3.eth.accounts[0]});
     assert(success);
@@ -42,6 +42,10 @@ contract("Identity", () => {
     assert(actionKey);
   })
 
+  it("Disallows adding a new key when sent from action key", async () => {
+    
+  })
+
   it("Gets keys by purpose", async () => {
     const mgmtKeys = await identity.getKeysByPurpose(1);
     expect(mgmtKeys[0]).to.equal(web3.sha3(web3.eth.accounts[0], {encoding: "hex"}));
@@ -51,5 +55,21 @@ contract("Identity", () => {
 
     expect(mgmtKeys.length).to.equal(1);
     expect(actionKeys.length).to.equal(1);
+  })
+
+  it("Executes a transaction from management key", async () => {
+
+  })
+
+  it("Executes a transaction from action key", async () => {
+
+  })
+
+  it("Disallows removing a key when sent from action key", async () => {
+
+  })
+
+  it("Removes a key when sent from management key", async () => {
+
   })
 })
