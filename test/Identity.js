@@ -41,4 +41,15 @@ contract("Identity", () => {
     const actionKey = await identity.keyHasPurpose(keyToAdd, 2);
     assert(actionKey);
   })
+
+  it("Gets keys by purpose", async () => {
+    const mgmtKeys = await identity.getKeysByPurpose(1);
+    expect(mgmtKeys[0]).to.equal(web3.sha3(web3.eth.accounts[0], {encoding: "hex"}));
+
+    const actionKeys = await identity.getKeysByPurpose(2);
+    expect(actionKeys[0]).to.equal(web3.sha3(web3.eth.accounts[3], {encoding: "hex"}));
+
+    expect(mgmtKeys.length).to.equal(1);
+    expect(actionKeys.length).to.equal(1);
+  })
 })

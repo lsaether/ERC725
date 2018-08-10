@@ -16,6 +16,8 @@ contract Identity is ERC725 {
             key: origKey
         });
 
+        keysByPurpose[1].push(origKey);
+
         emit KeyAdded(origKey, 1, 1);
     }
 
