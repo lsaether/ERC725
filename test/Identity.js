@@ -43,7 +43,16 @@ contract("Identity", () => {
   })
 
   it("Disallows adding a new key when sent from action key", async () => {
-    
+    const keyToAdd = web3.sha3(web3.eth.accounts[7], {encoding: "hex"});
+    let returnVal;
+    try {
+      returnVal = await identity.addKey(keyToAdd, 2, 1, {from: web3.eth.accounts[3]});
+    } catch (e) {
+      const reverted = e.toString().indexOf("VM Exception while processing transaction: revert");
+      expect(reverted).to.not.equal(-1);
+    }
+
+    expect(returnVal).to.be.undefined;
   })
 
   it("Gets keys by purpose", async () => {
