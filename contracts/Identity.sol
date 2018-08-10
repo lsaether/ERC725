@@ -8,8 +8,17 @@ contract Identity is ERC725 {
     mapping (bytes32 => Key) keys;
     mapping (uint256 => bytes32[]) keysByPurpose;
     
+    constructor() {
+        bytes32 origKey = keccak256(msg.sender);
+        keys[origKey] = Key({
+            purpose: 1,
+            keyType: 1,
+            key: origKey
+        });
+    }
+
     function getKey(bytes32 _key)
-        public view returns (uint256[] purposes, uint256 keyType, bytes32 key)
+        public view returns (uint256 purpose, uint256 keyType, bytes32 key)
     {
         return (
             keys[_key].purpose,
@@ -47,7 +56,7 @@ contract Identity is ERC725 {
 
         // TODO approval process
 
-        keys[_key] = new Key({
+        keys[_key] = Key({
             purpose: _purpose,
             keyType: _keyType,
             key: _key
