@@ -1,0 +1,32 @@
+{
+  "name": "erc725",
+  "version": "0.0.1",
+  "description": "ERC725 implementation",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^4.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsaether/ERC725.git"
+  },
+  "keywords": [
+    "solidity",
+    "identity",
+    "ethereum",
+    "erc725"
+  ],
+  "author": "Lsaether",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/lsaether/ERC725/issues"
+  },
+  "homepage": "https://github.com/lsaether/ERC725#readme"
+}

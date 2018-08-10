@@ -15,6 +15,8 @@ contract Identity is ERC725 {
             keyType: 1,
             key: origKey
         });
+
+        emit KeyAdded(origKey, 1, 1);
     }
 
     function getKey(bytes32 _key)
