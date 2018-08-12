@@ -1,5 +1,6 @@
 const Identity = artifacts.require("./Identity.sol");
 
+const BigNumber = require("bignumber.js");
 const { expect } = require("chai");
 
 contract("Identity", () => {
@@ -66,7 +67,7 @@ contract("Identity", () => {
     expect(actionKeys.length).to.equal(1);
   })
 
-  it("Executes a transaction from management key", async () => {
+  const executeTest = async (from) => {
     const account9 = web3.eth.accounts[9];
     const executeParams = {
       to: account9,
@@ -75,46 +76,52 @@ contract("Identity", () => {
     };
 
     web3.eth.sendTransaction({
-      from: web3.eth.accounts[0],
+      from,
       to: identity.address,
       value: executeParams.value,  
     })
 
     const account9BalanceBefore = web3.eth.getBalance(account9);
 
+    const currentNonce = (await identity.nonce()).toNumber();
+
     const executeTx = await identity.execute(
       executeParams.to,
       executeParams.value,
       executeParams.data,
       {
-        from: web3.eth.accounts[0],
+        from,
       }
     );
 
     const { logs } = executeTx;
     expect(logs[0].event).to.equal("ExecutionRequest");
-    expect(logs[0].args.executionId.toNumber()).to.equal(0);
+    expect(logs[0].args.executionId.toNumber()).to.equal(currentNonce);
     expect(logs[0].args.to).to.equal(executeParams.to);
     expect(logs[0].args.value.toString()).to.equal(executeParams.value);
     expect(logs[0].args.data).to.equal(executeParams.data);
 
     expect(logs[1].event).to.equal("Approved");
-    expect(logs[1].args.executionId.toNumber()).to.equal(0);
+    expect(logs[1].args.executionId.toNumber()).to.equal(currentNonce);
     expect(logs[1].args.approved).to.equal(true);
 
     expect(logs[2].event).to.equal("Executed");
-    expect(logs[2].args.executionId.toNumber()).to.equal(0);
+    expect(logs[2].args.executionId.toNumber()).to.equal(currentNonce);
     expect(logs[2].args.to).to.equal(executeParams.to);
     expect(logs[2].args.value.toString()).to.equal(executeParams.value);
     expect(logs[2].args.data).to.equal(executeParams.data);
 
     const account9BalanceAfter = web3.eth.getBalance(account9);
 
-    expect(account9BalanceAfter.toNumber()).to.equal(account9BalanceBefore.toNumber() + parseInt(executeParams.value, 10));
+    expect(account9BalanceAfter.toString()).to.equal(account9BalanceBefore.add(new BigNumber(executeParams.value)).toString());
+  }
+
+  it("Executes a transaction from management key", async () => {
+    await executeTest(web3.eth.accounts[0]);
   })
 
   it("Executes a transaction from action key", async () => {
-
+    await executeTest(web3.eth.accounts[3]);
   })
 
   it("Disallows removing a key when sent from action key", async () => {

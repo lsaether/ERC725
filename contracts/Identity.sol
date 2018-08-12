@@ -4,7 +4,7 @@ import "./ERC725.sol";
 
 contract Identity is ERC725 {
 
-    uint256 nonce;
+    uint256 public nonce;
     mapping (bytes32 => Key) keys;
     mapping (uint256 => bytes32[]) keysByPurpose;
     
