@@ -8,8 +8,8 @@ contract Identity is ERC725 {
     mapping (bytes32 => Key) keys;
     mapping (uint256 => bytes32[]) keysByPurpose;
     
-    constructor() {
-        bytes32 origKey = keccak256(msg.sender);
+    constructor() public {
+        bytes32 origKey = hashAddr(msg.sender);
         keys[origKey] = Key({
             purpose: 1,
             keyType: 1,
@@ -45,7 +45,7 @@ contract Identity is ERC725 {
     }
 
     function getKeysByPurpose(uint256 _purpose)
-        public view returns (bytes32[] keys)
+        public view returns (bytes32[])
     {
         return keysByPurpose[_purpose];
     }
@@ -55,7 +55,7 @@ contract Identity is ERC725 {
     {
         require(keys[_key].key == 0x0, "Cannot overwrite key.");
         if (msg.sender != address(this)) {
-            require(keyHasPurpose(keccak256(msg.sender), 1), "Sender must be manangement key.");
+            require(keyHasPurpose(hashAddr(msg.sender), 1), "Sender must be manangement key.");
         }
 
         // TODO approval process
@@ -78,7 +78,7 @@ contract Identity is ERC725 {
     {
         require(keys[_key].key != 0x0, "Key does not exist!");
         if (msg.sender != address(this)) {
-            require(keyHasPurpose(keccak256(msg.sender), 1), "Sender must be management key.");
+            require(keyHasPurpose(hashAddr(msg.sender), 1), "Sender must be management key.");
         }
 
         // TODO approval process
@@ -104,7 +104,7 @@ contract Identity is ERC725 {
     function execute(address _to, uint256 _value, bytes _data)
         public returns (uint256 executionId)
     {
-        bytes32 key = keccak256(msg.sender);
+        bytes32 key = hashAddr(msg.sender);
         require(keyHasPurpose(key, 1) || keyHasPurpose(key, 2), "Sender must be management or action key.");
 
         emit ExecutionRequest(nonce, _to, _value, _data);
@@ -125,11 +125,17 @@ contract Identity is ERC725 {
     function approve(uint256 _id, bool _approved)
         public returns (bool success)
     {
-        bytes32 key = keccak256(msg.sender);
+        bytes32 key = hashAddr(msg.sender);
         require(keyHasPurpose(key, 1) || keyHasPurpose(key, 2), "Sender must be management or action key.");
 
         emit Approved(_id, _approved);
 
         return true;
+    }
+
+    function hashAddr(address _addr)
+        private pure returns (bytes32)
+    {
+        return keccak256(abi.encodePacked(_addr));
     }
 }
