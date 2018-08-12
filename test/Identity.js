@@ -67,7 +67,50 @@ contract("Identity", () => {
   })
 
   it("Executes a transaction from management key", async () => {
+    const account9 = web3.eth.accounts[9];
+    const executeParams = {
+      to: account9,
+      value: web3.toWei("3", "gwei"),
+      data: web3.sha3("Some data"),
+    };
 
+    web3.eth.sendTransaction({
+      from: web3.eth.accounts[0],
+      to: identity.address,
+      value: executeParams.value,  
+    })
+
+    const account9BalanceBefore = web3.eth.getBalance(account9);
+
+    const executeTx = await identity.execute(
+      executeParams.to,
+      executeParams.value,
+      executeParams.data,
+      {
+        from: web3.eth.accounts[0],
+      }
+    );
+
+    const { logs } = executeTx;
+    expect(logs[0].event).to.equal("ExecutionRequest");
+    expect(logs[0].args.executionId.toNumber()).to.equal(0);
+    expect(logs[0].args.to).to.equal(executeParams.to);
+    expect(logs[0].args.value.toString()).to.equal(executeParams.value);
+    expect(logs[0].args.data).to.equal(executeParams.data);
+
+    expect(logs[1].event).to.equal("Approved");
+    expect(logs[1].args.executionId.toNumber()).to.equal(0);
+    expect(logs[1].args.approved).to.equal(true);
+
+    expect(logs[2].event).to.equal("Executed");
+    expect(logs[2].args.executionId.toNumber()).to.equal(0);
+    expect(logs[2].args.to).to.equal(executeParams.to);
+    expect(logs[2].args.value.toString()).to.equal(executeParams.value);
+    expect(logs[2].args.data).to.equal(executeParams.data);
+
+    const account9BalanceAfter = web3.eth.getBalance(account9);
+
+    expect(account9BalanceAfter.toNumber()).to.equal(account9BalanceBefore.toNumber() + parseInt(executeParams.value, 10));
   })
 
   it("Executes a transaction from action key", async () => {

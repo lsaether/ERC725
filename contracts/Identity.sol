@@ -21,6 +21,8 @@ contract Identity is ERC725 {
         emit KeyAdded(origKey, 1, 1);
     }
 
+    function () public payable {}
+
     function getKey(bytes32 _key)
         public view returns (uint256 purpose, uint256 keyType, bytes32 key)
     {
@@ -101,6 +103,7 @@ contract Identity is ERC725 {
         success = true;
     }
 
+    // Estimated gas overhead= 63947
     function execute(address _to, uint256 _value, bytes _data)
         public returns (uint256 executionId)
     {
