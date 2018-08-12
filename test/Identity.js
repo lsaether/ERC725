@@ -125,10 +125,26 @@ contract("Identity", () => {
   })
 
   it("Disallows removing a key when sent from action key", async () => {
+    const keyToRemove = web3.sha3(web3.eth.accounts[0], {encoding: "hex"});
+    let returnVal;
+    try {
+      returnVal = await identity.removeKey(keyToRemove, 1, {from: web3.eth.accounts[3]});
+    } catch (e) {
+      const reverted = e.toString().indexOf("VM Exception while processing transaction: revert");
+      expect(reverted).to.not.equal(-1);
+    }
 
+    expect(returnVal).to.be.undefined;
   })
 
   it("Removes a key when sent from management key", async () => {
+    const keyToRemove = web3.sha3(web3.eth.accounts[3], {encoding: "hex"});
+    const removeTx = await identity.removeKey(keyToRemove, 2, {from: web3.eth.accounts[0]});
+    expect(removeTx.logs[0].event).to.equal("KeyRemoved");
 
+    const keyDetails = await identity.getKey(keyToRemove);
+    expect(keyDetails[0].toNumber()).to.equal(0);
+    expect(keyDetails[1].toNumber()).to.equal(0);
+    expect(keyDetails[2]).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
   })
 })
